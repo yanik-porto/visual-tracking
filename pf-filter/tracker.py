@@ -13,6 +13,9 @@ class Tracker:
         self.patchWidth = rect[2]
         self.patchHeight = rect[3]
         self.xi = [rect[0] + rect[2] // 2, rect[1] + rect[3] // 2,]
+        self.channels = 1
+        if len(img.shape) == 3:
+            self.channels = img.shape[2]
         self.desc = self.computeDescription(self.xi , img)
 
         #init particles
@@ -35,7 +38,7 @@ class Tracker:
         cv2.waitKey(10)
 
     def computeDescription(self, center, img):
-        cd = np.zeros(self.nBins)
+        cd = np.zeros(self.nBins * self.channels)
 
         if center[0] < self.patchWidth // 2 or center[1] < self.patchHeight // 2 :
            return cd
@@ -52,16 +55,17 @@ class Tracker:
         dist /= np.amax(dist)
 
 
+        # Get pixel value and add distance coeff in corresponding bin
         for i in range(patch.shape[0]):
             for j in range(patch.shape[1]):
-                bgr = patch[i, j]
-                red = bgr[2]
-                val = math.ceil(red / 255 * (self.nBins - 1))
-                
-                kE = 0
-                if dist[i, j]**2 < 1:
-                    kE = 2 / math.pi * (1 - dist[i, j]**2)
-                cd[val] += kE
+                pixel = patch[i, j]
+                for c in range(self.channels):
+                    val = math.ceil(pixel[c] / 255 * (self.nBins - 1))
+                    kE = 0
+                    if dist[i, j]**2 < 1:
+                        kE = 2 / math.pi * (1 - dist[i, j]**2)
+                    cd[val + c*self.nBins] += kE
+
         return cd
 
     def updateParticles(self, xprev):
