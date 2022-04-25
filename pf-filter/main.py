@@ -6,7 +6,7 @@ from tracker import Tracker
 def parse():
     parser = argparse.ArgumentParser(description='particle filter tracking')
     parser.add_argument('--video', required=True, type=str, help='video where performing tracking')
-    parser.add_argument('--rectangle', required=False, type=str, default=[133, 28, 44, 36], help='video where performing tracking')
+    parser.add_argument('--rectangle', required=False, type=str, default=[133, 28, 44, 36], help='video where performing tracking') # TODO : check if possible with something else than default
     return parser.parse_args()
 
 if __name__ == "__main__":
